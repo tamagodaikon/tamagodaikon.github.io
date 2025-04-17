@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>携帯分解プロトタイプ</title>
+  <style>
+    .tool-btn { margin: 5px; padding: 8px; cursor: pointer; }
+    .part { margin: 10px; padding: 10px; border: 1px solid #999; width: 200px; }
+    .disabled { opacity: 0.5; pointer-events: none; }
+    #log { margin-top: 20px; color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>工具を選ぶ</h2>
+  <button class="tool-btn" onclick="selectTool('suction')">吸盤</button>
+  <button class="tool-btn" onclick="selectTool('plastic')">プラスチック工具</button>
+
+  <h2>パーツを外す</h2>
+  <div class="part" id="lcd" onclick="removePart('lcd')">液晶パネル</div>
+  <div class="part disabled" id="battery" onclick="removePart('battery')">電池パック</div>
+  <div class="part disabled" id="board" onclick="removePart('board')">メイン基板</div>
+
+  <div id="log"></div>
+
+  <script>
+    let selectedTool = null;
+    let state = {
+      lcd: false,
+      battery: false,
+      board: false
+    };
+
+    function selectTool(tool) {
+      selectedTool = tool;
+      logMsg(`工具「${tool === 'suction' ? '吸盤' : 'プラスチック工具'}」を選びました`);
+    }
+
+    function removePart(part) {
+      if (part === 'lcd') {
+        if (selectedTool !== 'suction') {
+          return logMsg("液晶パネルには吸盤が必要です！");
+        }
+        state.lcd = true;
+        document.getElementById('lcd').classList.add('disabled');
+        document.getElementById('battery').classList.remove('disabled');
+        return logMsg("液晶パネルを外しました！");
+      }
+
+      if (part === 'battery') {
+        if (!state.lcd) return logMsg("液晶パネルを先に外してください！");
+        if (selectedTool !== 'plastic') {
+          return logMsg("電池パックにはプラスチック工具が必要です！（金属はNG）");
+        }
+        state.battery = true;
+        document.getElementById('battery').classList.add('disabled');
+        document.getElementById('board').classList.remove('disabled');
+        return logMsg("電池パックを外しました！");
+      }
+
+      if (part === 'board') {
+        if (!state.battery) return logMsg("電池パックを先に外してください！");
+        state.board = true;
+        document.getElementById('board').classList.add('disabled');
+        return logMsg("基板を外しました！成功です！");
+      }
+    }
+
+    function logMsg(msg) {
+      document.getElementById('log').innerText = msg;
+    }
+  </script>
+</body>
+</html>
