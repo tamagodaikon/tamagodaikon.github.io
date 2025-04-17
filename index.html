@@ -2,84 +2,91 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>携帯分解プロトタイプ（ネジ付き）</title>
+  <title>iPhone分解シミュレーター</title>
   <style>
-    .tool-btn { margin: 5px; padding: 8px; cursor: pointer; }
-    .part { margin: 10px; padding: 10px; border: 1px solid #999; width: 200px; position: relative; }
-    .disabled { opacity: 0.5; pointer-events: none; }
-    .screw { width: 20px; height: 20px; background: gray; border-radius: 50%; position: absolute; cursor: pointer; }
-    #screw1 { top: 0; left: 0; }
-    #screw2 { top: 0; right: 0; }
-    #screw3 { bottom: 0; left: 0; }
-    #screw4 { bottom: 0; right: 0; }
-    #log { margin-top: 20px; color: red; font-weight: bold; }
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    #container { position: relative; width: 200px; height: 300px; margin: auto; }
+    .screw {
+      width: 30px; height: 30px; position: absolute; cursor: pointer;
+    }
+    #screw1 { top: 5px; left: 5px; }
+    #screw2 { top: 5px; right: 5px; }
+    #screw3 { bottom: 5px; left: 5px; }
+    #screw4 { bottom: 5px; right: 5px; }
+    #lcdPanel, #mainBoard {
+      position: absolute;
+      top: 25px; left: 25px;
+      width: 150px; height: 250px;
+      cursor: pointer;
+    }
+    #mainBoard { display: none; }
   </style>
 </head>
 <body>
-  <h2>工具を選ぶ</h2>
-  <button class="tool-btn" onclick="selectTool('plus')">プラスドライバー</button>
-  <button class="tool-btn" onclick="selectTool('plastic')">プラスチック工具</button>
 
-  <h2>パーツを外す</h2>
-  <div class="part" id="lcd">
-    液晶パネル
-    <div class="screw" id="screw1" onclick="removeScrew(1)"></div>
-    <div class="screw" id="screw2" onclick="removeScrew(2)"></div>
-    <div class="screw" id="screw3" onclick="removeScrew(3)"></div>
-    <div class="screw" id="screw4" onclick="removeScrew(4)"></div>
+<h2>iPhone分解シミュレーター</h2>
+<p>ネジをクリックして外してください（4つすべて）。</p>
+<div id="container">
+  <!-- ネジ4本 -->
+  <div id="screw1" class="screw" onclick="removeScrew(1)">
+    <svg width="30" height="30"><circle cx="15" cy="15" r="13" fill="#ccc" stroke="#555" stroke-width="2"/>
+    <line x1="5" y1="15" x2="25" y2="15" stroke="#333" stroke-width="2"/>
+    <line x1="15" y1="5" x2="15" y2="25" stroke="#333" stroke-width="2"/></svg>
   </div>
-  <div class="part disabled" id="battery" onclick="removePart('battery')">電池パック</div>
+  <div id="screw2" class="screw" onclick="removeScrew(2)">
+    <svg width="30" height="30"><circle cx="15" cy="15" r="13" fill="#ccc" stroke="#555" stroke-width="2"/>
+    <line x1="5" y1="15" x2="25" y2="15" stroke="#333" stroke-width="2"/>
+    <line x1="15" y1="5" x2="15" y2="25" stroke="#333" stroke-width="2"/></svg>
+  </div>
+  <div id="screw3" class="screw" onclick="removeScrew(3)">
+    <svg width="30" height="30"><circle cx="15" cy="15" r="13" fill="#ccc" stroke="#555" stroke-width="2"/>
+    <line x1="5" y1="15" x2="25" y2="15" stroke="#333" stroke-width="2"/>
+    <line x1="15" y1="5" x2="15" y2="25" stroke="#333" stroke-width="2"/></svg>
+  </div>
+  <div id="screw4" class="screw" onclick="removeScrew(4)">
+    <svg width="30" height="30"><circle cx="15" cy="15" r="13" fill="#ccc" stroke="#555" stroke-width="2"/>
+    <line x1="5" y1="15" x2="25" y2="15" stroke="#333" stroke-width="2"/>
+    <line x1="15" y1="5" x2="15" y2="25" stroke="#333" stroke-width="2"/></svg>
+  </div>
 
-  <div id="log"></div>
+  <!-- 液晶パネル -->
+  <svg id="lcdPanel" onclick="removeLcd()" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="150" height="250" rx="10" ry="10" fill="#2c3e50" stroke="#34495e" stroke-width="4"/>
+    <text x="75" y="135" font-size="18" fill="white" text-anchor="middle">LCD</text>
+  </svg>
 
-  <script>
-    let selectedTool = null;
-    let screwState = [false, false, false, false]; // 4本のネジ
-    let lcdRemoved = false;
+  <!-- 基板 -->
+  <svg id="mainBoard" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="120" height="180" rx="5" ry="5" fill="#27ae60" stroke="#1e8449" stroke-width="4"/>
+    <circle cx="60" cy="90" r="10" fill="#ecf0f1"/>
+    <text x="60" y="150" font-size="14" fill="white" text-anchor="middle">基板</text>
+  </svg>
+</div>
 
-    function selectTool(tool) {
-      selectedTool = tool;
-      logMsg(`工具「${tool === 'plus' ? 'プラスドライバー' : 'プラスチック工具'}」を選びました`);
+<script>
+  let screwsRemoved = [false, false, false, false];
+
+  function removeScrew(index) {
+    document.getElementById(`screw${index}`).style.display = "none";
+    screwsRemoved[index - 1] = true;
+    checkAllScrews();
+  }
+
+  function checkAllScrews() {
+    if (screwsRemoved.every(Boolean)) {
+      document.getElementById("lcdPanel").style.stroke = "#f1c40f";
     }
+  }
 
-    function removeScrew(index) {
-      if (selectedTool !== 'plus') {
-        return logMsg("このネジはプラスドライバーでないと外せません！");
-      }
-      const screwEl = document.getElementById(`screw${index}`);
-      if (!screwState[index - 1]) {
-        screwState[index - 1] = true;
-        screwEl.style.display = 'none';
-        logMsg(`ネジ${index}を外しました`);
-
-        if (screwState.every(s => s)) {
-          document.getElementById('lcd').onclick = () => removePart('lcd');
-          logMsg("全てのネジを外しました！液晶パネルが外せます！");
-        }
-      }
+  function removeLcd() {
+    if (!screwsRemoved.every(Boolean)) {
+      alert("ネジを全部外してください！");
+      return;
     }
+    document.getElementById("lcdPanel").style.display = "none";
+    document.getElementById("mainBoard").style.display = "block";
+  }
+</script>
 
-    function removePart(part) {
-      if (part === 'lcd') {
-        lcdRemoved = true;
-        document.getElementById('lcd').classList.add('disabled');
-        document.getElementById('battery').classList.remove('disabled');
-        return logMsg("液晶パネルを外しました！");
-      }
-
-      if (part === 'battery') {
-        if (!lcdRemoved) return logMsg("液晶パネルを先に外してください！");
-        if (selectedTool !== 'plastic') {
-          return logMsg("電池パックにはプラスチック工具が必要です！");
-        }
-        document.getElementById('battery').classList.add('disabled');
-        return logMsg("電池パックを外しました！");
-      }
-    }
-
-    function logMsg(msg) {
-      document.getElementById('log').innerText = msg;
-    }
-  </script>
 </body>
 </html>
