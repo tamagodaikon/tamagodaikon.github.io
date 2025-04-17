@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>iPhone分解シミュレーター</title>
+  <title>分解シミュレーター with 工具判定</title>
   <style>
     body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
     #container { position: relative; width: 200px; height: 300px; margin: auto; }
@@ -20,12 +20,20 @@
       cursor: pointer;
     }
     #mainBoard { display: none; }
+    .tool-btn { margin: 5px; padding: 6px 12px; cursor: pointer; }
+    #log { margin-top: 20px; color: red; font-weight: bold; text-align: center; }
   </style>
 </head>
 <body>
 
-<h2>iPhone分解シミュレーター</h2>
-<p>ネジをクリックして外してください（4つすべて）。</p>
+<h2>工具を選んでネジとパネルを外そう</h2>
+
+<div style="text-align: center;">
+  <button class="tool-btn" onclick="selectTool('star')">🔩 星形ドライバー</button>
+  <button class="tool-btn" onclick="selectTool('spudger')">🪛 ヘラ</button>
+  <button class="tool-btn" onclick="selectTool('other')">🧰 その他</button>
+</div>
+
 <div id="container">
   <!-- ネジ4本 -->
   <div id="screw1" class="screw" onclick="removeScrew(1)">
@@ -63,10 +71,26 @@
   </svg>
 </div>
 
+<div id="log">現在の工具：未選択</div>
+
 <script>
   let screwsRemoved = [false, false, false, false];
+  let selectedTool = null;
+
+  function selectTool(tool) {
+    selectedTool = tool;
+    let name = {
+      star: '星形ドライバー',
+      spudger: 'ヘラ',
+      other: 'その他工具'
+    }[tool];
+    logMsg(`現在の工具：${name}`);
+  }
 
   function removeScrew(index) {
+    if (selectedTool !== 'star') {
+      return logMsg("このネジは星形ドライバーでないと外せません！");
+    }
     document.getElementById(`screw${index}`).style.display = "none";
     screwsRemoved[index - 1] = true;
     checkAllScrews();
@@ -75,16 +99,24 @@
   function checkAllScrews() {
     if (screwsRemoved.every(Boolean)) {
       document.getElementById("lcdPanel").style.stroke = "#f1c40f";
+      logMsg("ネジをすべて外しました！LCDをヘラで取り外せます。");
     }
   }
 
   function removeLcd() {
     if (!screwsRemoved.every(Boolean)) {
-      alert("ネジを全部外してください！");
-      return;
+      return logMsg("先にネジをすべて外してください！");
+    }
+    if (selectedTool !== 'spudger') {
+      return logMsg("LCDを外すにはヘラが必要です！");
     }
     document.getElementById("lcdPanel").style.display = "none";
     document.getElementById("mainBoard").style.display = "block";
+    logMsg("LCDを外しました！基板が見えました。");
+  }
+
+  function logMsg(msg) {
+    document.getElementById("log").innerText = msg;
   }
 </script>
 
