@@ -1,0 +1,47 @@
+body {
+  font-family: sans-serif;
+  background: #f4f4f4;
+  padding: 20px;
+}
+
+#container {
+  position: relative;
+  width: 200px;
+  height: 300px;
+  margin: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+
+.tool-btn {
+  margin: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#log {
+  margin-top: 20px;
+  color: red;
+  font-weight: bold;
+  text-align: center;
+}
+
+.screw, .inner-screw {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  cursor: pointer;
+}
+
+#lcdPanel, #mainBoard, #mainBoardBack {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  width: 150px;
+  height: 250px;
+  cursor: pointer;
+}
+
+#mainBoard, #mainBoardBack, .inner-screw {
+  display: none;
+}
