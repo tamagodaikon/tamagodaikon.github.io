@@ -2,45 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>分解シミュレーター v2</title>
-  <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-    #container { position: relative; width: 200px; height: 300px; margin: auto; background: #fff; border: 1px solid #ccc; }
-    .screw {
-      width: 30px; height: 30px; position: absolute; cursor: pointer;
-    }
-    #screw1, #screw2, #screw3, #screw4 { top: 5px; }
-    #screw1 { left: 5px; }
-    #screw2 { right: 5px; }
-    #screw3 { bottom: 5px; left: 5px; }
-    #screw4 { bottom: 5px; right: 5px; }
-
-    #lcdPanel, #mainBoard, #mainBoardBack {
-      position: absolute;
-      top: 25px; left: 25px;
-      width: 150px; height: 250px;
-      cursor: pointer;
-    }
-
-    #mainBoard, #mainBoardBack, .inner-screw {
-      display: none;
-    }
-
-    .tool-btn { margin: 5px; padding: 6px 12px; cursor: pointer; }
-    #log { margin-top: 20px; color: red; font-weight: bold; text-align: center; }
-
-    .inner-screw {
-      width: 25px;
-      height: 25px;
-      position: absolute;
-      cursor: pointer;
-    }
-
-    #innerScrew1 { top: 30px; left: 30px; }
-    #innerScrew2 { top: 30px; right: 30px; }
-    #innerScrew3 { bottom: 30px; left: 30px; }
-    #innerScrew4 { bottom: 30px; right: 30px; }
-  </style>
+  <title>分解シミュレーター</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -52,106 +15,20 @@
 </div>
 
 <div id="container">
-  <!-- 液晶パネル -->
-  <svg id="lcdPanel" onclick="removeLcd()" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="150" height="250" rx="10" ry="10" fill="#2c3e50" stroke="#34495e" stroke-width="4"/>
-    <text x="75" y="135" font-size="18" fill="white" text-anchor="middle">LCD</text>
-  </svg>
+  <!-- SVGやパーツ配置は省略（JSで生成も可能） -->
+  <!-- 中身は script.js で動作 -->
+  <svg id="lcdPanel"></svg>
+  <svg id="mainBoard"></svg>
+  <svg id="mainBoardBack"></svg>
 
-  <!-- 基板 -->
-  <svg id="mainBoard" onclick="removeBoard()" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="150" height="250" rx="8" ry="8" fill="#27ae60" stroke="#1e8449" stroke-width="4"/>
-    <circle cx="75" cy="125" r="10" fill="#ecf0f1"/>
-    <text x="75" y="150" font-size="16" fill="white" text-anchor="middle">基板</text>
-  </svg>
-
-  <!-- 裏基板（基板が外れた後に残る） -->
-  <svg id="mainBoardBack" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="150" height="250" rx="8" ry="8" fill="#95a5a6" stroke="#7f8c8d" stroke-width="4"/>
-    <text x="75" y="135" font-size="14" fill="white" text-anchor="middle">基板裏</text>
-  </svg>
-
-  <!-- 基板のネジ4本 -->
-  <div id="innerScrew1" class="inner-screw" onclick="removeInnerScrew(1)">
-    <svg width="25" height="25"><circle cx="12" cy="12" r="10" fill="#ccc" stroke="#555" stroke-width="2"/>
-      <line x1="6" y1="12" x2="18" y2="12" stroke="#333" stroke-width="2"/>
-      <line x1="12" y1="6" x2="12" y2="18" stroke="#333" stroke-width="2"/></svg>
-  </div>
-  <div id="innerScrew2" class="inner-screw" onclick="removeInnerScrew(2)">
-    <svg width="25" height="25"><circle cx="12" cy="12" r="10" fill="#ccc" stroke="#555" stroke-width="2"/>
-        <line x1="6" y1="12" x2="18" y2="12" stroke="#333" stroke-width="2"/>
-        <line x1="12" y1="6" x2="12" y2="18" stroke="#333" stroke-width="2"/></svg>
-  </div>
-  <div id="innerScrew3" class="inner-screw" onclick="removeInnerScrew(3)">
-    <svg width="25" height="25"><circle cx="12" cy="12" r="10" fill="#ccc" stroke="#555" stroke-width="2"/>
-        <line x1="6" y1="12" x2="18" y2="12" stroke="#333" stroke-width="2"/>
-        <line x1="12" y1="6" x2="12" y2="18" stroke="#333" stroke-width="2"/></svg>
-  </div>
-  <div id="innerScrew4" class="inner-screw" onclick="removeInnerScrew(4)">
-    <svg width="25" height="25"><circle cx="12" cy="12" r="10" fill="#ccc" stroke="#555" stroke-width="2"/>
-        <line x1="6" y1="12" x2="18" y2="12" stroke="#333" stroke-width="2"/>
-        <line x1="12" y1="6" x2="12" y2="18" stroke="#333" stroke-width="2"/></svg>
-  </div>
+  <div id="innerScrew1" class="inner-screw"></div>
+  <div id="innerScrew2" class="inner-screw"></div>
+  <div id="innerScrew3" class="inner-screw"></div>
+  <div id="innerScrew4" class="inner-screw"></div>
 </div>
 
 <div id="log">現在の工具：未選択</div>
 
-<script>
-  let selectedTool = null;
-  let lcdRemoved = false;
-  let boardScrewsRemoved = [false, false, false, false];
-
-  function selectTool(tool) {
-    selectedTool = tool;
-    const name = tool === 'star' ? '星形ドライバー' : 'ヘラ';
-    logMsg(`現在の工具：${name}`);
-  }
-
-  function removeLcd() {
-    if (lcdRemoved) return;
-    if (selectedTool !== 'spudger') {
-      return logMsg("液晶を外すにはヘラが必要です！");
-    }
-    lcdRemoved = true;
-    document.getElementById("lcdPanel").style.display = "none";
-    document.getElementById("mainBoard").style.display = "block";
-
-    // ネジ4本表示
-    for (let i = 1; i <= 4; i++) {
-      document.getElementById(`innerScrew${i}`).style.display = "block";
-    }
-    logMsg("液晶を外しました。次は基板のネジを外してください。");
-  }
-
-  function removeInnerScrew(index) {
-    if (selectedTool !== 'star') {
-      return logMsg("基板のネジには星形ドライバーが必要です！");
-    }
-    const el = document.getElementById(`innerScrew${index}`);
-    if (!boardScrewsRemoved[index - 1]) {
-      el.style.display = "none";
-      boardScrewsRemoved[index - 1] = true;
-      logMsg(`ネジ${index}を外しました`);
-
-      if (boardScrewsRemoved.every(Boolean)) {
-        logMsg("すべてのネジを外しました。基板をクリックして取り外してください。");
-      }
-    }
-  }
-
-  function removeBoard() {
-    if (!boardScrewsRemoved.every(Boolean)) {
-      return logMsg("すべてのネジを外してください！");
-    }
-    document.getElementById("mainBoard").style.display = "none";
-    document.getElementById("mainBoardBack").style.display = "block";
-    logMsg("基板を取り外しました。裏側が残っています。");
-  }
-
-  function logMsg(msg) {
-    document.getElementById("log").innerText = msg;
-  }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
